@@ -1,4 +1,4 @@
 <?php
 
-# Folder Path (category tree). The page asks for one parent at a time.
-$folder_browse_field = 200;
+# 0 until an admin picks a category tree on the setup page.
+$folder_browse_field = 0;
