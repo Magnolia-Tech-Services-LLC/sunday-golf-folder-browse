@@ -247,3 +247,21 @@
 .fb-back {
     font-weight: 500;
 }
+
+/* Setup page. .Question floats every label; keep each tree beside its own box. */
+.fb-setup .fb-setup-options {
+    border-collapse: collapse;
+}
+
+.fb-setup .fb-setup-options td {
+    padding: 0.15em 0.4em 0.15em 0;
+    vertical-align: middle;
+}
+
+.fb-setup .fb-setup-options label {
+    float: none;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    font-weight: normal;
+}

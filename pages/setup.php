@@ -52,26 +52,33 @@ $links_trail = [
     <?php } ?>
     <form method="post" action="<?php echo escape($_SERVER["PHP_SELF"]); ?>">
         <?php generateFormToken("form1"); ?>
-        <div class="Question">
+        <div class="Question fb-setup">
             <label><?php echo escape($lang["folder_browse_setup_field"]); ?></label>
             <?php if ($choices === []) { ?>
                 <p><?php echo escape($lang["folder_browse_nofield"]); ?></p>
-            <?php } ?>
-            <?php foreach ($choices as $choice) {
-                $id = (int) $choice["ref"];
-                ?>
-                <div>
-                    <input
-                        type="checkbox"
-                        name="folder_browse_fields[]"
-                        value="<?php echo $id; ?>"
-                        id="folder_browse_field_<?php echo $id; ?>"
-                        <?php if (in_array($id, $selected, true)) { ?>checked<?php } ?>
-                    >
-                    <label for="folder_browse_field_<?php echo $id; ?>"><?php
-                        echo escape(folder_browse_field_label($choice));
-                    ?></label>
-                </div>
+            <?php } else { ?>
+                <table class="fb-setup-options" cellpadding="2" cellspacing="0">
+                    <?php foreach ($choices as $choice) {
+                        $id = (int) $choice["ref"];
+                        ?>
+                        <tr>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    name="folder_browse_fields[]"
+                                    value="<?php echo $id; ?>"
+                                    id="folder_browse_field_<?php echo $id; ?>"
+                                    <?php if (in_array($id, $selected, true)) { ?>checked<?php } ?>
+                                >
+                            </td>
+                            <td>
+                                <label for="folder_browse_field_<?php echo $id; ?>"><?php
+                                    echo escape(folder_browse_field_label($choice));
+                                ?></label>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </table>
             <?php } ?>
             <div class="clearerleft"></div>
         </div>
