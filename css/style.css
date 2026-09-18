@@ -1,0 +1,249 @@
+/* Scoped to .fb. ResourceSpace loads this on every page. */
+
+.fb-path {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4em;
+    margin: 0 0 0.6em;
+    font-size: 0.9em;
+}
+
+.fb-path .fb-chevron {
+    width: 0.75em;
+    height: 0.75em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.55;
+}
+
+.fb-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5em;
+    margin-bottom: 1em;
+}
+
+.fb-head h1 {
+    margin: 0 0 0.2em;
+}
+
+.fb-summary {
+    margin: 0;
+    opacity: 0.75;
+}
+
+.fb-files {
+    white-space: nowrap;
+}
+
+.fb-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8em 1em;
+    margin: 0 0 1em;
+}
+
+.fb-filter-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
+.fb-filter-box {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    width: min(100%, 22em);
+    height: 2.6em;
+    padding: 0 0.7em;
+    border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.fb-filter-box:focus-within {
+    border-color: currentColor;
+    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.fb-filter-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+}
+
+.fb-filter-clear {
+    border: 0;
+    border-radius: 1em;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    color: inherit;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.15em 0.45em;
+}
+
+.fb-filter-status,
+.fb-filter-order {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.fb-filter-order {
+    margin-left: auto;
+    opacity: 0.75;
+}
+
+.fb .fb-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 7.5em 2.2em;
+    align-items: center;
+    min-height: 3.2em;
+    position: relative;
+}
+
+.fb .ListviewTitleStyle .fb-line {
+    min-height: 2.2em;
+    font-size: 0.75em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.fb-files-col,
+.fb-count {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.fb-row .fb-line {
+    border-bottom: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.fb-row:hover .fb-line,
+.fb-row:focus-within .fb-line {
+    background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.fb-open {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 400;
+}
+
+.fb-open--branch {
+    font-weight: 500;
+}
+
+.fb-open::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.fb-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fb-count {
+    position: relative;
+    z-index: 2;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.fb-count:hover,
+.fb-open:hover .fb-label {
+    text-decoration: underline;
+}
+
+.fb-icon,
+.fb-chevron {
+    width: 1.15em;
+    height: 1.15em;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linejoin: round;
+}
+
+.fb-icon--branch {
+    fill: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.fb-icon--leaf {
+    opacity: 0.55;
+}
+
+.fb-chev {
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+    z-index: 0;
+}
+
+.fb-chevron {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.45;
+}
+
+.fb-row:hover .fb-chevron,
+.fb-row:focus-within .fb-chevron {
+    opacity: 1;
+}
+
+.fb-hit {
+    background: color-mix(in srgb, currentColor 18%, transparent);
+    color: inherit;
+    padding: 0 0.05em;
+}
+
+.fb-note {
+    margin: 0.8em 0 0;
+    font-size: 0.85em;
+    opacity: 0.75;
+}
+
+.fb-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8em;
+    padding: 1.5em 0 0.5em;
+}
+
+.fb-empty .fb-icon {
+    width: 2.2em;
+    height: 2.2em;
+}
+
+.fb-empty p {
+    margin: 0;
+}
+
+.fb-back {
+    font-weight: 500;
+}
