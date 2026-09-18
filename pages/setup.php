@@ -7,23 +7,78 @@ if (!is_file($rs_include . "/boot.php")) {
 }
 include $rs_include . "/boot.php";
 include $rs_include . "/authenticate.php";
+include_once __DIR__ . "/../include/folder_browse_functions.php";
 if (!checkperm("a")) {
     exit($lang["error-permissiondenied"]);
 }
 
-$plugin_name = "folder_browse";
-$page_heading = $lang["folder_browse_setup"];
-$page_intro = $lang["folder_browse_setup_intro"];
-$page_def = [];
-$page_def[] = config_add_single_ftype_select(
-    "folder_browse_field",
-    $lang["folder_browse_setup_field"],
-    300,
-    false,
-    [FIELD_TYPE_CATEGORY_TREE]
-);
+$saved = false;
+if ((getval("submit", "") != "" || getval("save", "") != "") && enforcePostRequest(false)) {
+    $picked = getval("folder_browse_fields", [], false, "is_array");
+    folder_browse_save_fields(is_array($picked) ? $picked : []);
+    if (getval("submit", "") != "") {
+        redirect("pages/team/team_plugins.php");
+    }
+    $saved = true;
+}
 
-config_gen_setup_post($page_def, $plugin_name);
+$choices = get_resource_type_fields("", "title", "asc", "", [FIELD_TYPE_CATEGORY_TREE], false);
+if (!is_array($choices)) {
+    $choices = [];
+}
+$selected = folder_browse_configured_ids();
+
 include $rs_include . "/header.php";
-config_gen_setup_html($page_def, $plugin_name, null, $page_heading, $page_intro);
+global $baseurl_short;
+$links_trail = [
+    [
+        "title" => $lang["systemsetup"],
+        "href" => $baseurl_short . "pages/admin/admin_home.php",
+        "menu" => true,
+    ],
+    [
+        "title" => $lang["pluginmanager"],
+        "href" => $baseurl_short . "pages/team/team_plugins.php",
+    ],
+    ["title" => $lang["folder_browse_setup"]],
+];
+?>
+<div class="BasicsBox">
+    <h1><?php echo escape($lang["folder_browse_setup"]); ?></h1>
+    <?php renderBreadcrumbs($links_trail); ?>
+    <p><?php echo escape($lang["folder_browse_setup_intro"]); ?></p>
+    <?php if ($saved) { ?>
+        <p><?php echo escape($lang["folder_browse_saved"]); ?></p>
+    <?php } ?>
+    <form method="post" action="<?php echo escape($_SERVER["PHP_SELF"]); ?>">
+        <?php generateFormToken("form1"); ?>
+        <div class="Question">
+            <label><?php echo escape($lang["folder_browse_setup_field"]); ?></label>
+            <?php if ($choices === []) { ?>
+                <p><?php echo escape($lang["folder_browse_nofield"]); ?></p>
+            <?php } ?>
+            <?php foreach ($choices as $choice) {
+                $id = (int) $choice["ref"];
+                ?>
+                <div>
+                    <input
+                        type="checkbox"
+                        name="folder_browse_fields[]"
+                        value="<?php echo $id; ?>"
+                        id="folder_browse_field_<?php echo $id; ?>"
+                        <?php if (in_array($id, $selected, true)) { ?>checked<?php } ?>
+                    >
+                    <label for="folder_browse_field_<?php echo $id; ?>"><?php
+                        echo escape(folder_browse_field_label($choice));
+                    ?></label>
+                </div>
+            <?php } ?>
+            <div class="clearerleft"></div>
+        </div>
+        <div class="QuestionSubmit">
+            <input name="save" type="submit" value="<?php echo escape($lang["save"]); ?>">
+        </div>
+    </form>
+</div>
+<?php
 include $rs_include . "/footer.php";

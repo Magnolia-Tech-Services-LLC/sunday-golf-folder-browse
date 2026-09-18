@@ -20,6 +20,7 @@ if (!checkperm("s") || !folder_browse_ready()) {
 }
 
 $parent = (int) getval("parent", 0);
+$field_id = (int) getval("field", 0);
 $current = $parent > 0 ? folder_browse_node($parent) : [];
 if ($parent > 0 && $current === []) {
     include $rs_include . "/header.php";
@@ -30,17 +31,60 @@ if ($parent > 0 && $current === []) {
     include $rs_include . "/footer.php";
     exit;
 }
-
-$children = folder_browse_children($parent);
-$child_refs = array_column($children, "ref");
-$branches = array_flip(folder_browse_branch_refs($child_refs));
-$count_refs = $child_refs;
 if ($parent > 0) {
-    $count_refs[] = $parent;
+    $field_id = (int) $current["resource_type_field"];
 }
-$counts = folder_browse_counts($count_refs);
+$field = $field_id > 0 ? folder_browse_field($field_id) : [];
+if ($parent === 0 && $field_id > 0 && $field === []) {
+    include $rs_include . "/header.php";
+    echo "<div class=\"BasicsBox\"><h1>" . escape($lang["folder_browse"]) . "</h1>";
+    echo "<p>" . escape($lang["folder_browse_missing"]) . "</p>";
+    echo "<p><a href=\"" . escape(folder_browse_page_url()) . "\" onclick=\"return CentralSpaceLoad(this, true);\">";
+    echo escape($lang["folder_browse"]) . "</a></p></div>";
+    include $rs_include . "/footer.php";
+    exit;
+}
+
+$showing_fields = $parent === 0 && $field_id === 0;
+if ($showing_fields) {
+    $listed = folder_browse_fields();
+    $counts = folder_browse_field_counts(array_column($listed, "ref"));
+    $rows = [];
+    foreach ($listed as $listed_field) {
+        $id = (int) $listed_field["ref"];
+        $rows[] = [
+            "name" => folder_browse_field_label($listed_field),
+            "open" => folder_browse_page_url(0, $id),
+            "branch" => true,
+            "count" => $counts[$id] ?? 0,
+            "search" => "",
+        ];
+    }
+} else {
+    $children = folder_browse_children($parent, $field_id);
+    $child_refs = array_column($children, "ref");
+    $branches = array_flip(folder_browse_branch_refs($child_refs, $field_id));
+    $count_refs = $child_refs;
+    if ($parent > 0) {
+        $count_refs[] = $parent;
+    }
+    $counts = folder_browse_counts($count_refs);
+    $rows = [];
+    foreach ($children as $child) {
+        $ref = (int) $child["ref"];
+        $opens = isset($branches[$ref]);
+        $rows[] = [
+            "name" => folder_browse_label($child),
+            "open" => $opens ? folder_browse_page_url($ref) : folder_browse_search_url($ref),
+            "branch" => $opens,
+            "count" => $counts[$ref] ?? 0,
+            "search" => folder_browse_search_url($ref),
+        ];
+    }
+}
+
 $here = $parent > 0 ? ($counts[$parent] ?? 0) : 0;
-$child_count = count($children);
+$child_count = count($rows);
 $show_filter = folder_browse_shows_filter($child_count);
 
 $ancestors = [];
@@ -56,21 +100,38 @@ if ($ancestors !== []) {
         "label" => folder_browse_label($up),
         "url" => folder_browse_page_url((int) $up["ref"]),
     ];
+} elseif ($parent > 0) {
+    $back = [
+        "label" => folder_browse_field_label($field),
+        "url" => folder_browse_page_url(0, $field_id),
+    ];
 }
 
-$title = $parent > 0 ? folder_browse_label($current) : $lang["folder_browse"];
-$summary = $parent > 0
-    ? folder_browse_count_text("folder_browse_subfolders_one", "folder_browse_subfolders", $child_count)
-    : folder_browse_count_text("folder_browse_top_one", "folder_browse_top", $child_count);
+if ($showing_fields) {
+    $title = $lang["folder_browse"];
+    $summary = folder_browse_count_text("folder_browse_trees_one", "folder_browse_trees", $child_count);
+} elseif ($parent > 0) {
+    $title = folder_browse_label($current);
+    $summary = folder_browse_count_text("folder_browse_subfolders_one", "folder_browse_subfolders", $child_count);
+} else {
+    $title = folder_browse_field_label($field);
+    $summary = folder_browse_count_text("folder_browse_top_one", "folder_browse_top", $child_count);
+}
 
 include $rs_include . "/header.php";
 ?>
 <div class="BasicsBox fb">
-    <?php if ($ancestors !== []) { ?>
+    <?php if (!$showing_fields) { ?>
         <nav class="fb-path" aria-label="<?php echo escape($lang["folder_browse_path"]); ?>">
             <a href="<?php echo escape(folder_browse_page_url()); ?>" onclick="return CentralSpaceLoad(this, true);"><?php
                 echo escape($lang["folder_browse"]);
             ?></a>
+            <?php if ($parent > 0) { ?>
+                <?php echo folder_browse_chevron_icon(); ?>
+                <a href="<?php echo escape(folder_browse_page_url(0, $field_id)); ?>" onclick="return CentralSpaceLoad(this, true);"><?php
+                    echo escape(folder_browse_field_label($field));
+                ?></a>
+            <?php } ?>
             <?php foreach ($ancestors as $step) { ?>
                 <?php echo folder_browse_chevron_icon(); ?>
                 <a href="<?php echo escape(folder_browse_page_url((int) $step["ref"])); ?>" onclick="return CentralSpaceLoad(this, true);"><?php
@@ -83,11 +144,11 @@ include $rs_include . "/header.php";
     <div class="fb-head">
         <div>
             <h1><?php echo escape($title); ?></h1>
-            <?php if ($children !== []) { ?>
+            <?php if ($rows !== []) { ?>
                 <p class="fb-summary"><?php echo escape($summary); ?></p>
             <?php } ?>
         </div>
-        <?php if ($parent > 0 && $children !== []) { ?>
+        <?php if ($parent > 0 && $rows !== []) { ?>
             <a class="Button fb-files" href="<?php echo escape(folder_browse_search_url($parent)); ?>" onclick="return CentralSpaceLoad(this, true);"><?php
                 echo escape($here > 0 ? folder_browse_files_label($here) : $lang["folder_browse_show_files"]);
             ?></a>
@@ -112,7 +173,7 @@ include $rs_include . "/header.php";
         </div>
     <?php } ?>
 
-    <?php if ($children === []) { ?>
+    <?php if ($rows === []) { ?>
         <div class="fb-empty">
             <?php echo folder_browse_folder_icon(false); ?>
             <p><?php echo escape(folder_browse_empty_text($here)); ?></p>
@@ -121,7 +182,7 @@ include $rs_include . "/header.php";
                     echo escape(folder_browse_files_label($here, $title));
                 ?></a>
             <?php } ?>
-            <?php if ($parent > 0) { ?>
+            <?php if ($parent > 0 || $field_id > 0) { ?>
                 <a class="fb-back" href="<?php echo escape($back["url"]); ?>" onclick="return CentralSpaceLoad(this, true);"><?php
                     echo escape(str_replace("%name", $back["label"], $lang["folder_browse_back"]));
                 ?></a>
@@ -139,24 +200,23 @@ include $rs_include . "/header.php";
                     </span>
                 </th>
             </tr>
-            <?php foreach ($children as $child) {
-                $ref = (int) $child["ref"];
-                $opens = isset($branches[$ref]);
-                $label = folder_browse_label($child);
-                $open_url = $opens ? folder_browse_page_url($ref) : folder_browse_search_url($ref);
-                ?>
-            <tr class="fb-row" data-name="<?php echo escape($label); ?>">
+            <?php foreach ($rows as $row) { ?>
+            <tr class="fb-row" data-name="<?php echo escape($row["name"]); ?>">
                 <td colspan="3">
                     <div class="fb-line">
-                        <a class="fb-open<?php echo $opens ? " fb-open--branch" : ""; ?>" href="<?php
-                            echo escape($open_url);
+                        <a class="fb-open<?php echo $row["branch"] ? " fb-open--branch" : ""; ?>" href="<?php
+                            echo escape($row["open"]);
                         ?>" onclick="return CentralSpaceLoad(this, true);"><?php
-                            echo folder_browse_folder_icon($opens);
-                        ?><span class="fb-label"><?php echo escape($label); ?></span></a>
-                        <a class="fb-count" href="<?php echo escape(folder_browse_search_url($ref)); ?>" onclick="return CentralSpaceLoad(this, true);"><?php
-                            echo (int) ($counts[$ref] ?? 0);
-                        ?></a>
-                        <span class="fb-chev"><?php echo $opens ? folder_browse_chevron_icon() : ""; ?></span>
+                            echo folder_browse_folder_icon($row["branch"]);
+                        ?><span class="fb-label"><?php echo escape($row["name"]); ?></span></a>
+                        <?php if ($row["search"] !== "") { ?>
+                            <a class="fb-count" href="<?php echo escape($row["search"]); ?>" onclick="return CentralSpaceLoad(this, true);"><?php
+                                echo (int) $row["count"];
+                            ?></a>
+                        <?php } else { ?>
+                            <span class="fb-files-col"><?php echo (int) $row["count"]; ?></span>
+                        <?php } ?>
+                        <span class="fb-chev"><?php echo $row["branch"] ? folder_browse_chevron_icon() : ""; ?></span>
                     </div>
                 </td>
             </tr>
@@ -165,7 +225,7 @@ include $rs_include . "/header.php";
         </div>
         <p class="fb-note"><?php
             echo escape($lang["folder_browse_counts_note"]);
-            if ($parent === 0) {
+            if ($parent === 0 && $field_id > 0) {
                 echo " " . escape($lang["folder_browse_order_note"]);
             }
         ?></p>
