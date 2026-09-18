@@ -2,6 +2,7 @@ name: folder_browse
 title: Folder browse
 author: Magnolia Tech Services
 version: 1
-desc: Browse the Folder Path tree one folder at a time, without loading the whole tree.
+desc: Browse one level of a category tree at a time.
 icon: folder
 category: Asset
+config_url: /plugins/folder_browse/pages/setup.php
