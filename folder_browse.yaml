@@ -1,0 +1,7 @@
+name: folder_browse
+title: Folder browse
+author: Magnolia Tech Services
+version: 1
+desc: Browse the Folder Path tree one folder at a time, without loading the whole tree.
+icon: folder
+category: Asset
