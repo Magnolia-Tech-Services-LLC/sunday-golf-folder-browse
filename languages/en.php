@@ -2,8 +2,11 @@
 
 $lang["folder_browse"] = "Folders";
 $lang["folder_browse_setup"] = "Folder browse setup";
-$lang["folder_browse_setup_intro"] = "Choose the category tree this page walks, one folder at a time.";
-$lang["folder_browse_setup_field"] = "Category tree";
+$lang["folder_browse_setup_intro"] = "Choose the category trees this page walks, one folder at a time. Folders opens on these trees, then on the folders inside the one you pick.";
+$lang["folder_browse_setup_field"] = "Category trees";
+$lang["folder_browse_trees_one"] = "1 tree";
+$lang["folder_browse_trees"] = "%n trees";
+$lang["folder_browse_saved"] = "Saved.";
 $lang["folder_browse_files"] = "Files";
 $lang["folder_browse_col_folder"] = "Folder";
 $lang["folder_browse_path"] = "Folder path";
